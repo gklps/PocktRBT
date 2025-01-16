@@ -41,10 +41,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       fetchUserData();
     }
+
+    if (token) {
+      // TODO: handle origin
+      if (window.opener) {
+        window.opener.postMessage(token, '*');
+      }
+    }
+
   }, [token]);
 
   const login = (newToken: string) => {
     localStorage.setItem('token', newToken);
+
+    // TODO: handle origin
+    if (window.opener) {
+      window.opener.postMessage(newToken, '*');
+    }
+
     setToken(newToken);
     navigate('/');
   };
