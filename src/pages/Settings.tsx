@@ -16,17 +16,18 @@ const Settings = () => {
     setIsRegistering(true);
     try {
       const response = await registerDid(user.did, token);
-      if (response === 'DID registered successfully') {
-        toast.success('DID registered successfully');
-      } else {
-        toast.error(response.error || 'Failed to register DID');
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to register DID');
-    } finally {
-      setIsRegistering(false);
+    // Check if the response contains "DID registered successfully"
+    if (response.includes("DID registered successfully")) {
+      toast.success('DID registered successfully');
+    } else {
+      toast.error(response.error || 'Failed to register DID');
     }
-  };
+  } catch (error: any) {
+    toast.error(error.response?.data?.error || 'Failed to register DID');
+  } finally {
+    setIsRegistering(false);
+  }
+};
 
   const colors = [
     { name: 'yellow', class: 'bg-yellow-500' },
