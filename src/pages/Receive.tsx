@@ -8,20 +8,32 @@ const Receive = () => {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopy = () => {
     if (!user?.did) return;
     
+    // Create a temporary input element
+    const textArea = document.createElement('textarea');
+    textArea.value = user.did;
+    document.body.appendChild(textArea);
+    
     try {
-      await navigator.clipboard.writeText(user.did);
+      // Select and copy the text
+      textArea.select();
+      document.execCommand('copy');
+      
+      // Show success state
       setCopied(true);
       toast.success('DID copied to clipboard');
       
-      // Reset the copied state after 2 seconds
+      // Reset copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
       }, 2000);
     } catch (err) {
       toast.error('Failed to copy DID');
+    } finally {
+      // Clean up
+      document.body.removeChild(textArea);
     }
   };
 
