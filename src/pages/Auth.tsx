@@ -78,23 +78,32 @@ const Auth = () => {
         toast.error(errors[0]);
         return;
       }
-    }
 
-    try {
-      if (isLogin) {
-        const response = await login(email, password);
-        authLogin(response.token);
-        navigate('/');
-      } else {
+      if (!name.trim()) {
+        toast.error('Please enter your name');
+        return;
+      }
+
+      try {
         const response = await signup(email, password, name);
         if (response.did) {
           toast.success('Account created successfully! Please login.');
           setIsLogin(true);
           setPassword('');
         }
+      } catch (error: any) {
+        console.error('Signup error:', error);
+        toast.error(error.response?.data?.error || 'Failed to create account');
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'An error occurred');
+    } else {
+      try {
+        const response = await login(email, password);
+        authLogin(response.token);
+        navigate('/');
+      } catch (error: any) {
+        console.error('Login error:', error);
+        toast.error(error.response?.data?.error || 'Invalid credentials');
+      }
     }
   };
 
@@ -104,7 +113,7 @@ const Auth = () => {
         <div className={`bg-${accentColor}-500 w-16 h-16 rounded-2xl mb-8 mx-auto flex items-center justify-center transform rotate-45`}>
           <div className="transform -rotate-45">
             <img
-              src={`/resources/favicon.png`}
+              src="https://rubix.net/assets/rubixNewLogo-R7D-hBOI.png"
               alt="Rubix Logo"
               className="w-10 h-10"
             />
@@ -204,7 +213,7 @@ const Auth = () => {
             </button>
           </form>
 
-          <div className="text-center text-white">
+          <div className="text-center">
             <button
               onClick={() => {
                 setIsLogin(!isLogin);
