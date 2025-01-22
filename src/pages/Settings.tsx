@@ -16,18 +16,17 @@ const Settings = () => {
     setIsRegistering(true);
     try {
       const response = await registerDid(user.did, token);
-    // Check if the response contains "DID registered successfully"
-    if (response.includes("DID registered successfully")) {
-      toast.success('DID registered successfully');
-    } else {
-      toast.error(response.error || 'Failed to register DID');
+      if (response.includes("DID registered successfully")) {
+        toast.success('DID registered successfully');
+      } else {
+        toast.error(response.error || 'Failed to register DID');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to register DID');
+    } finally {
+      setIsRegistering(false);
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || 'Failed to register DID');
-  } finally {
-    setIsRegistering(false);
-  }
-};
+  };
 
   const colors = [
     { name: 'yellow', class: 'bg-yellow-500' },
@@ -60,7 +59,7 @@ const Settings = () => {
             </div>
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="px-4 py-2 border rounded-md hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+              className={`px-4 py-2 border rounded-md hover:bg-gray-50 dark:border-gray-700 dark:text-black dark:hover:bg-gray-300 bg-${accentColor}-50 hover:bg-${accentColor}-100`}
             >
               {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
             </button>

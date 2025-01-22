@@ -7,6 +7,7 @@ import Receive from './pages/Receive';
 import Send from './pages/Send';
 import History from './pages/History';
 import Settings from './pages/Settings';
+import Assets from './pages/Assets';
 import Layout from './components/Layout';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -29,6 +30,7 @@ function AppRoutes() {
       <Route path="/send" element={<PrivateRoute><Layout><Send /></Layout></PrivateRoute>} />
       <Route path="/history" element={<PrivateRoute><Layout><History /></Layout></PrivateRoute>} />
       <Route path="/settings" element={<PrivateRoute><Layout><Settings /></Layout></PrivateRoute>} />
+      <Route path="/assets" element={<PrivateRoute><Layout><Assets /></Layout></PrivateRoute>} />
     </Routes>
   );
 }

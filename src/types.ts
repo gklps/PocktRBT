@@ -45,10 +45,44 @@ export interface Transaction {
   TransactionType: string;
 }
 
-
 export interface TransactionHistory {
   TxnDetails: Transaction[];
   message: string;
   result: string;
   status: boolean;
+}
+
+export interface NFT {
+  nft: string;
+  nft_value: number;
+  owner_did: string;
+}
+
+export interface NFTResponse {
+  message: string;
+  nfts: NFT[];
+  result: null;
+  status: boolean;
+}
+
+export interface FT {
+  creator_did: string;
+  ft_count: number;
+  ft_name: string;
+}
+
+export interface FTResponse {
+  ft_info: FT[];
+  message: string;
+  result: null;
+  status: boolean;
+}
+
+export interface TransferFTParams {
+  sender: string;
+  receiver: string;
+  ft_count: number;
+  ft_name: string;
+  creatorDID: string;
+  quorum_type?: number;
 }

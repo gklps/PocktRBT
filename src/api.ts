@@ -1,18 +1,23 @@
 import axios from 'axios';
+import type { TransferFTParams } from './types';
 
-const API_URL = 'http://4.240.108.34:8080';
+// Create axios instance
+const api = axios.create();
 
-/**
- * Signs up a new user.
- *
- * @param email - The email address of the user.
- * @param password - The password of the user.
- * @param name - The name of the user.
- *
- * @returns The response data from the server.
- */
+// Update base URL before each request
+api.interceptors.request.use(async (config) => {
+  // Set default values for the config if they don't exist
+  config.headers = config.headers || {};
+  
+  // Get the API URL from environment variables first, fallback to localhost
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  config.baseURL = apiUrl;
+  
+  return config;
+});
+
 export const signup = async (email: string, password: string, name: string) => {
-  const response = await axios.post(`${API_URL}/create`, {
+  const response = await api.post('/create', {
     email,
     password,
     name,
@@ -20,39 +25,23 @@ export const signup = async (email: string, password: string, name: string) => {
   return response.data;
 };
 
-/**
- * Logs in a user.
- *
- * @param email - The email address of the user.
- * @param password - The password of the user.
- *
- * @returns The response data from the server.
- */
 export const login = async (email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/login`, {
+  const response = await api.post('/login', {
     email,
     password,
   });
   return response.data;
 };
 
-/**
- * Gets the profile of the user.
- *
- * @param token - The authentication token of the user.
- *
- * @returns The response data from the server.
- */
 export const getProfile = async (token: string) => {
-  const response = await axios.get(`${API_URL}/profile`, {
+  const response = await api.get('/profile', {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-
 export const getBalance = async (did: string, token: string) => {
-  const response = await axios.get(`${API_URL}/request_balance?did=${did}`, {
+  const response = await api.get(`/request_balance?did=${did}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
@@ -64,8 +53,8 @@ export const sendTokens = async (
   amount: number,
   token: string
 ) => {
-  const response = await axios.post(
-    `${API_URL}/request_txn`,
+  const response = await api.post(
+    '/request_txn',
     {
       did: senderDid,
       receiver: receiverDid,
@@ -85,8 +74,8 @@ export const getTransactionHistory = async (
   endDate: string,
   token: string
 ) => {
-  const response = await axios.get(
-    `${API_URL}/txn/by_did?did=${did}&role=${role}&StartDate=${startDate}&EndDate=${endDate}`,
+  const response = await api.get(
+    `/txn/by_did?did=${did}&role=${role}&StartDate=${startDate}&EndDate=${endDate}`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -95,12 +84,33 @@ export const getTransactionHistory = async (
 };
 
 export const registerDid = async (did: string, token: string) => {
-  const response = await axios.post(
-    `${API_URL}/register_did`,
+  const response = await api.post(
+    '/register_did',
     { did },
     {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  return response.data;
+};
+
+export const getAllNFTs = async (did: string, token: string) => {
+  const response = await api.get(`/get_all_nft?did=${did}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getAllFTs = async (did: string, token: string) => {
+  const response = await api.get(`/get_all_ft?did=${did}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const transferFT = async (params: TransferFTParams, token: string) => {
+  const response = await api.post('/transfer_ft', params, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return response.data;
 };

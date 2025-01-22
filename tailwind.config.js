@@ -22,8 +22,29 @@ export default {
   },
   safelist: [
     {
-      pattern: /bg-(yellow|blue|green|purple|red)-(50|500|600|700)/,
+      pattern: /bg-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
     },
+    {
+      pattern: /text-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /border-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /ring-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /hover:bg-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /hover:text-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /hover:border-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern: /focus:ring-(yellow|blue|green|purple|red)-(50|100|200|300|400|500|600|700|800|900)/,
+    }
   ],
   plugins: [],
 };

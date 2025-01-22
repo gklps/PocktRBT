@@ -8,7 +8,8 @@ import {
   Settings as SettingsIcon, 
   LogOut,
   Menu,
-  X
+  X,
+  Database
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -25,6 +26,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { icon: SendHorizontal, label: 'Send', path: '/send' },
     { icon: QrCode, label: 'Receive', path: '/receive' },
     { icon: HistoryIcon, label: 'History', path: '/history' },
+    { icon: Database, label: 'Assets', path: '/assets' },
     { icon: SettingsIcon, label: 'Settings', path: '/settings' },
   ];
 
@@ -77,7 +79,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   onClick={() => handleNavigation(item.path)}
                   className={`flex items-center space-x-2 w-full p-3 rounded transition-colors ${
                     active
-                      ? 'bg-yellow-600 text-white'
+                      ? `bg-${accentColor}-600 text-white`
                       : 'text-white hover:bg-gray-800'
                   }`}
                 >
@@ -117,7 +119,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   onClick={() => handleNavigation(item.path)}
                   className={`flex items-center space-x-2 w-full p-3 rounded transition-colors ${
                     active
-                      ? 'bg-yellow-600 text-white'
+                      ? `bg-${accentColor}-600 text-white`
                       : 'text-white hover:bg-gray-800'
                   }`}
                 >

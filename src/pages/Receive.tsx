@@ -3,9 +3,11 @@ import QRCode from 'react-qr-code';
 import { toast } from 'react-hot-toast';
 import { Copy, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Receive = () => {
   const { user } = useAuth();
+  const { accentColor } = useTheme();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -58,7 +60,7 @@ const Receive = () => {
               />
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center px-4 py-2 border border-l-0 border-yellow-300 text-sm font-medium rounded-r-md text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                className={`inline-flex items-center px-4 py-2 border border-l-0 border-${accentColor}-300 text-sm font-medium rounded-r-md text-${accentColor}-700 bg-${accentColor}-50 hover:bg-${accentColor}-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${accentColor}-500 transition-colors`}
               >
                 {copied ? (
                   <>
