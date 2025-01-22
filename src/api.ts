@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://20.193.136.169:8080';
+const API_URL = 'http://4.240.108.34:8080';
 
 /**
  * Signs up a new user.

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Wallet, 
   QrCode, 
@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const { accentColor } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,6 +31,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const handleNavigation = (path: string) => {
     navigate(path);
     setIsMobileMenuOpen(false);
+  };
+
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
   };
 
   return (
@@ -63,11 +70,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <nav className="p-4 space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
+              const active = isActive(item.path);
               return (
                 <button
                   key={item.path}
                   onClick={() => handleNavigation(item.path)}
-                  className="flex items-center space-x-2 w-full p-3 rounded text-white hover:bg-gray-800"
+                  className={`flex items-center space-x-2 w-full p-3 rounded transition-colors ${
+                    active
+                      ? 'bg-yellow-600 text-white'
+                      : 'text-white hover:bg-gray-800'
+                  }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.label}</span>
@@ -98,11 +110,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <nav className="space-y-2 flex-grow">
             {navigationItems.map((item) => {
               const Icon = item.icon;
+              const active = isActive(item.path);
               return (
                 <button
                   key={item.path}
                   onClick={() => handleNavigation(item.path)}
-                  className="flex items-center space-x-2 w-full p-3 rounded text-white hover:bg-gray-800"
+                  className={`flex items-center space-x-2 w-full p-3 rounded transition-colors ${
+                    active
+                      ? 'bg-yellow-600 text-white'
+                      : 'text-white hover:bg-gray-800'
+                  }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.label}</span>
