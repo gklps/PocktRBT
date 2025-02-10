@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { TransferFTParams } from './types';
+import type { TransferFTParams } from './types.js';
 
 // Create axios instance
 const api = axios.create();
