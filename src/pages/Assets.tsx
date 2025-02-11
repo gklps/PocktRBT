@@ -34,9 +34,15 @@ const Assets = () => {
     setLoading(true);
     try {
       const response = await getAllNFTs(user.did, token);
-      setNfts(response.nfts || []);
+      if ('error' in response) {
+        toast.error((response.error || 'Failed to fetch NFTs').toString());;
+      } else if (response.status && response.result) {
+        setNfts(response.result);
+      } else {
+        toast.error(response.message || 'Failed to fetch NFTs');
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to fetch NFTs');
+      toast.error(error.message || 'Failed to fetch NFTs');
     } finally {
       setLoading(false);
     }
@@ -47,9 +53,15 @@ const Assets = () => {
     setLoading(true);
     try {
       const response = await getAllFTs(user.did, token);
-      setFts(response.ft_info || []);
+      if ('error' in response) {
+        toast.error((response.error || 'Failed to fetch FTs').toString());;
+      } else if (response.status && response.result) {
+        setFts(response.result);
+      } else {
+        toast.error(response.message || 'Failed to fetch FTs');
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to fetch FTs');
+      toast.error(error.message || 'Failed to fetch FTs');
     } finally {
       setLoading(false);
     }
@@ -70,12 +82,18 @@ const Assets = () => {
       };
 
       const response = await transferFT(params, token);
-      toast.success('FT transferred successfully');
-      setSelectedFT(null);
-      setTransferData({ receiverDid: '', ftCount: 1 });
-      fetchFTs();
+      if ('error' in response) {
+        toast.error((response.error || 'Failed to transfer FT').toString());;
+      } else if (response.status) {
+        toast.success(response.message || 'FT transferred successfully');
+        setSelectedFT(null);
+        setTransferData({ receiverDid: '', ftCount: 1 });
+        fetchFTs();
+      } else {
+        toast.error(response.message || 'Failed to transfer FT');
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to transfer FT');
+      toast.error(error.message || 'Failed to transfer FT');
     }
   };
 
@@ -205,8 +223,7 @@ const Assets = () => {
                         }
                         className="w-full p-2 border rounded-lg"
                         required
-                      />
-                    </div>
+                      /> </div>
                     <div className="flex space-x-2">
                       <button
                         type="submit"

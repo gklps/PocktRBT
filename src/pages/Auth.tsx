@@ -86,23 +86,29 @@ const Auth = () => {
 
       try {
         const response = await signup(email, password, name);
-        if (response.did) {
+        if ('error' in response) {
+          toast.error(response.error);
+        } else if (response.status && response.result) {
           toast.success('Account created successfully! Please login.');
           setIsLogin(true);
           setPassword('');
+        } else {
+          toast.error(response.message || 'Failed to create account');
         }
       } catch (error: any) {
-        console.error('Signup error:', error);
-        toast.error(error.response?.data?.error || 'Failed to create account');
+        toast.error(error.message || 'Failed to create account');
       }
     } else {
       try {
         const response = await login(email, password);
-        authLogin(response.token);
-        navigate('/');
+        if (response && response.token) {
+          authLogin(response.token);
+          navigate('/');
+        } else {
+          toast.error('Invalid credentials');
+        }
       } catch (error: any) {
-        console.error('Login error:', error);
-        toast.error(error.response?.data?.error || 'Invalid credentials');
+        toast.error(error.message || 'Invalid credentials');
       }
     }
   };
@@ -143,7 +149,7 @@ const Auth = () => {
                   placeholder="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="pl-10 w-full py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all"
+                  className={`pl-10 w-full py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent transition-all`}
                 />
               </div>
             )}
@@ -206,7 +212,7 @@ const Auth = () => {
 
             <button
               type="submit"
-              className={`w-full flex items-center justify-center py-3 px-4 rounded-xl text-white bg-${accentColor}-600 hover:bg-${accentColor}-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${accentColor}-500 transition-colors`}
+              className={`w-full flex items-center justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-${accentColor}-600 hover:bg-${accentColor}-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${accentColor}-500 transition-colors`}
             >
               <span className="mr-2">{isLogin ? 'Sign In' : 'Create Account'}</span>
               <ArrowRight className="w-5 h-5" />

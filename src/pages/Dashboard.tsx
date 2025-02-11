@@ -4,31 +4,56 @@ import { toast } from 'react-hot-toast';
 import { Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { getProfile, getBalance } from '../api';
-import { User, Balance } from '../types';
+import { getBalance } from '../api';
+import { User, AccountInfo } from '../types';
 
 const Dashboard = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { accentColor } = useTheme();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [balance, setBalance] = useState<Balance | null>(null);
+  const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBalance = async () => {
+      if (!token || !user?.did) return;
+
       try {
-        if (token) {
-          const userData = await getProfile(token);
-          setUser(userData);
-          const balanceData = await getBalance(userData.did, token);
-          setBalance(balanceData);
+        setLoading(true);
+        const balanceData = await getBalance(user.did, token);
+        if ('error' in balanceData) {
+          toast.error(balanceData.error || 'Failed to fetch balance');
+          return;
         }
-      } catch (error) {
-        toast.error('Failed to fetch wallet data');
+        if (balanceData.status && balanceData.result && balanceData.result.length > 0) {
+          setBalance(balanceData.result[0].rbt_amount);
+        }
+      } catch (error: any) {
+        console.error('Failed to fetch balance:', error);
+        toast.error(error.message || 'Failed to fetch balance');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [token]);
+
+    fetchBalance();
+  }, [token, user]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="space-y-4">
+              <div className="h-20 bg-gray-200 rounded"></div>
+              <div className="h-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -41,20 +66,20 @@ const Dashboard = () => {
               <span className="text-lg font-medium">Your Balance</span>
             </div>
             <span className="text-2xl font-bold">
-              {balance?.account_info[0]?.rbt_amount.toFixed(3) || '0'} RBT
+              {balance.toFixed(3)} RBT
             </span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/send')}
-              className={`flex items-center justify-center space-x-2 p-3 bg-${accentColor}-50 rounded-lg border border-${accentColor}-200 hover:bg-gray-200 transition-all duration-200`}
+              className={`flex items-center justify-center space-x-2 p-3 bg-${accentColor}-50 rounded-lg border border-${accentColor}-200 hover:bg-${accentColor}-100 transition-all duration-200`}
             >
               <ArrowUpRight className={`h-5 w-5 text-${accentColor}-600`} />
               <span>Send</span>
             </button>
             <button
               onClick={() => navigate('/receive')}
-              className={`flex items-center justify-center space-x-2 p-3 bg-${accentColor}-50 rounded-lg border border-${accentColor}-200 hover:bg-gray-200 transition-all duration-200`}
+              className={`flex items-center justify-center space-x-2 p-3 bg-${accentColor}-50 rounded-lg border border-${accentColor}-200 hover:bg-${accentColor}-100 transition-all duration-200`}
             >
               <ArrowDownLeft className={`h-5 w-5 text-${accentColor}-600`} />
               <span>Receive</span>
@@ -72,6 +97,14 @@ const Dashboard = () => {
           <div>
             <label className="block text-sm font-medium text-gray-500">Email</label>
             <p className="text-gray-900">{user?.email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500">Name</label>
+            <p className="text-gray-900">{user?.name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500">User ID</label>
+            <p className="text-gray-900">{user?.id}</p>
           </div>
         </div>
       </div>

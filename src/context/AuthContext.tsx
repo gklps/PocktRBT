@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { User } from '../types';
 import { getProfile } from '../api';
 
@@ -21,18 +22,29 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('token');
+  });
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (token) {
         try {
           const userData = await getProfile(token);
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-        } catch (error) {
+          if (userData) {
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+          } else {
+            toast.error('Invalid user data received');
+            logout();
+          }
+        } catch (error: any) {
           console.error('Failed to fetch user data:', error);
+          toast.error(error.message || 'Failed to fetch user data');
           logout();
         }
       }
@@ -41,24 +53,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       fetchUserData();
     }
-
-    if (token) {
-      // TODO: handle origin
-      if (window.opener) {
-        window.opener.postMessage(token, '*');
-      }
-    }
-
   }, [token]);
 
   const login = (newToken: string) => {
     localStorage.setItem('token', newToken);
-
-    // TODO: handle origin
-    if (window.opener) {
-      window.opener.postMessage(newToken, '*');
-    }
-
     setToken(newToken);
     navigate('/');
   };

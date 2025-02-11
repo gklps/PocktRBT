@@ -25,19 +25,22 @@ const Send = () => {
         parseFloat(amount),
         token
       );
-      if (response.status.includes('successfully')) {
-        toast.success('Transaction completed successfully');
+      
+      if ('error' in response) {
+        toast.error(response.error || 'Transaction failed');
+        setTransactionResult(JSON.stringify(response, null, 2));
+      } else if (response.status) {
+        toast.success(response.message || 'Transaction completed successfully');
         setTransactionResult(JSON.stringify(response, null, 2));
         setReceiverDid('');
         setAmount('');
       } else {
-        toast.error(response.status);
+        toast.error(response.message || 'Transaction failed');
         setTransactionResult(JSON.stringify(response, null, 2));
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Transaction failed';
-      toast.error(errorMessage);
-      setTransactionResult(JSON.stringify(error.response?.data || error.message, null, 2));
+      toast.error(error.message || 'Transaction failed');
+      setTransactionResult(JSON.stringify({ error: error.message }, null, 2));
     } finally {
       setIsLoading(false);
     }

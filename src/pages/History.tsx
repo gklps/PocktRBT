@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getTransactionHistory } from '../api';
-import type { Transaction } from '../types';
+import { Transaction } from '../types';
+import { toast } from 'react-hot-toast';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -17,7 +18,7 @@ const History = () => {
       if (!token || !user?.did) return;
 
       try {
-        // Format dates manually since we removed date-fns dependency
+        setLoading(true);
         const startDate = '2020-01-01';
         const endDate = new Date().toISOString().split('T')[0];
 
@@ -27,13 +28,14 @@ const History = () => {
         ]);
 
         const allTransactions = [
-          ...(sentTxns.TxnDetails || []),
-          ...(receivedTxns.TxnDetails || []),
+          ...('error' in sentTxns ? [] : (sentTxns.result || [])),
+          ...('error' in receivedTxns ? [] : (receivedTxns.result || [])),
         ].sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime());
 
         setTransactions(allTransactions);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch transaction history:', error);
+        toast.error(error.message || 'Failed to fetch transaction history');
       } finally {
         setLoading(false);
       }
