@@ -3,12 +3,15 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { sendTokens } from '../api';
+import { MessageSquare } from 'lucide-react';
 
 const Send = () => {
   const { token, user } = useAuth();
   const { accentColor } = useTheme();
   const [receiverDid, setReceiverDid] = useState('');
   const [amount, setAmount] = useState('');
+  const [comment, setComment] = useState('');
+  const [showComment, setShowComment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [transactionResult, setTransactionResult] = useState<string | null>(null);
 
@@ -23,7 +26,9 @@ const Send = () => {
         user.did,
         receiverDid,
         parseFloat(amount),
-        token
+        token,
+        comment || undefined,
+        2 // Default quorum type
       );
       
       if ('error' in response) {
@@ -34,6 +39,8 @@ const Send = () => {
         setTransactionResult(JSON.stringify(response, null, 2));
         setReceiverDid('');
         setAmount('');
+        setComment('');
+        setShowComment(false);
       } else {
         toast.error(response.message || 'Transaction failed');
         setTransactionResult(JSON.stringify(response, null, 2));
@@ -80,6 +87,44 @@ const Send = () => {
               placeholder="0.000"
             />
           </div>
+          
+          {!showComment ? (
+            <button
+              type="button"
+              onClick={() => setShowComment(true)}
+              className={`flex items-center text-${accentColor}-600 text-sm`}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Add a comment
+            </button>
+          ) : (
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="comment" className="block text-sm font-medium text-gray-700">
+                  Comment
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowComment(false);
+                    setComment('');
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <textarea
+                id="comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-${accentColor}-500 focus:ring-${accentColor}-500`}
+                placeholder="Add a comment to this transaction"
+                rows={2}
+              />
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
