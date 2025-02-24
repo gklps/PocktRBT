@@ -86,6 +86,7 @@ const Auth = () => {
 
       try {
         const response = await signup(email, password, name);
+        console.log(response);
         if (response.did && response.email) {
           toast.success('Account created successfully! Please login.');
           setIsLogin(true);

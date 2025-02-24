@@ -43,15 +43,34 @@ export const signup = async (
       email,
       password,
       name,
-      secret_key: password // Using password as secret key
+      secret_key: password, // Using password as secret key
+      wallet_type: 'server-custody' // Default to server custody
     };
     
     const response = await api.post<SignupResponse>('/create', data);
-    return response.data;
+    
+    // Check if response status is 201 (Created)
+    if (response.status === 201) {
+      return response.data;
+    }
+    
+    // If we have data but status isn't 201, still return the data
+    if (response.data) {
+      return response.data;
+    }
+    
+    throw new Error('Failed to create account');
   } catch (error: any) {
+    // Check if we have a response with error data
     if (error.response?.data?.error) {
       throw new Error(error.response.data.error);
     }
+    
+    // Check if we have a response with data but no error field
+    if (error.response?.data) {
+      return error.response.data;
+    }
+    
     throw new Error('Failed to create account');
   }
 };
@@ -160,12 +179,25 @@ export const sendTokens = async (
   did: string,
   receiver: string,
   rbtAmount: number,
-  token: string
+  token: string,
+  comment?: string,
+  quorumType?: number,
+  password?: string
 ): Promise<APIResponse> => {
   try {
+    const data: any = { 
+      did, 
+      receiver, 
+      rbt_amount: rbtAmount 
+    };
+
+    if (comment) data.comment = comment;
+    if (quorumType) data.quorum_type = quorumType;
+    if (password) data.password = password;
+
     const response = await api.post<APIResponse>(
       '/request_txn',
-      { did, receiver, rbt_amount: rbtAmount },
+      data,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
@@ -306,11 +338,52 @@ export const getAllFTs = async (did: string, token: string): Promise<APIResponse
   }
 };
 
-export const transferFT = async (params: TransferFTParams, token: string): Promise<APIResponse> => {
+export const createFT = async (
+  did: string,
+  ftName: string,
+  ftCount: number,
+  tokenCount: number,
+  token: string
+): Promise<APIResponse> => {
   try {
-    const response = await api.post<APIResponse>('/transfer_ft', params, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.post<APIResponse>(
+      '/create_ft',
+      {
+        did,
+        ft_name: ftName,
+        ft_count: ftCount,
+        token_count: tokenCount
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+export const transferFT = async (
+  sender: string,
+  receiver: string,
+  ftCount: number,
+  ftName: string,
+  creatorDID: string,
+  quorumType: number,
+  token: string
+): Promise<APIResponse> => {
+  try {
+    const response = await api.post<APIResponse>(
+      '/transfer_ft',
+      {
+        sender,
+        receiver,
+        ft_count: ftCount,
+        ft_name: ftName,
+        creatorDID,
+        quorum_type: quorumType
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   } catch (error) {
     return handleError(error);
@@ -345,13 +418,25 @@ export const generateSmartContract = async (
 };
 
 export const deploySmartContract = async (
-  data: DeploySmartContractRequest,
+  deployerAddr: string,
+  smartContractToken: string,
+  quorumType: number,
+  rbtAmount: number,
+  comment: string,
   token: string
 ): Promise<APIResponse> => {
   try {
-    const response = await api.post<APIResponse>('/deploy-smart-contract', data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.post<APIResponse>(
+      '/deploy-smart-contract',
+      {
+        deployerAddr,
+        smartContractToken,
+        quorumType,
+        rbtAmount,
+        comment
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   } catch (error) {
     return handleError(error);
@@ -359,13 +444,25 @@ export const deploySmartContract = async (
 };
 
 export const executeSmartContract = async (
-  data: ExecuteSmartContractRequest,
+  executorAddr: string,
+  smartContractToken: string,
+  smartContractData: string,
+  quorumType: number,
+  comment: string,
   token: string
 ): Promise<APIResponse> => {
   try {
-    const response = await api.post<APIResponse>('/execute-smart-contract', data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.post<APIResponse>(
+      '/execute-smart-contract',
+      {
+        executorAddr,
+        smartContractToken,
+        smartContractData,
+        quorumType,
+        comment
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   } catch (error) {
     return handleError(error);
@@ -381,6 +478,98 @@ export const subscribeSmartContract = async (
     const response = await api.post<APIResponse>(
       '/subscribe-smart-contract',
       { did, smartContractToken },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+// RBT Operations
+export const generateTestRBT = async (
+  did: string,
+  numberOfTokens: number,
+  token: string
+): Promise<APIResponse> => {
+  try {
+    const response = await api.post<APIResponse>(
+      '/testrbt/create',
+      {
+        did,
+        number_of_tokens: numberOfTokens
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+export const unpledgeRBT = async (
+  did: string,
+  token: string
+): Promise<APIResponse> => {
+  try {
+    const response = await api.post<APIResponse>(
+      '/rbt/unpledge',
+      { did },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+// Signing Operations
+export const sign = async (
+  did: string,
+  hash: string,
+  id: string,
+  mode: number,
+  onlyPrivKey: boolean = true
+): Promise<APIResponse> => {
+  try {
+    const response = await api.post<APIResponse>(
+      '/sign',
+      {
+        did,
+        sign_data: {
+          hash,
+          id,
+          mode,
+          only_priv_key: onlyPrivKey
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+export const passSignature = async (
+  did: string,
+  id: string,
+  mode: number,
+  signature: number[],
+  token: string
+): Promise<APIResponse> => {
+  try {
+    const response = await api.post<APIResponse>(
+      '/pass_signature',
+      {
+        did,
+        sign_response: {
+          id,
+          mode,
+          signature: {
+            Signature: signature
+          }
+        }
+      },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
