@@ -102,10 +102,7 @@ const Dashboard = () => {
             <label className="block text-sm font-medium text-gray-500">Name</label>
             <p className="text-gray-900">{user?.name}</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-500">User ID</label>
-            <p className="text-gray-900">{user?.id}</p>
-          </div>
+          
         </div>
       </div>
     </div>
