@@ -210,13 +210,17 @@ export const sendTokens = async (
 export const getTransactionHistory = async (
   did: string,
   role: 'Sender' | 'Receiver',
-  startDate: string,
-  endDate: string,
-  token: string
+  token: string,
+  startDate?: string,
+  endDate?: string
 ): Promise<APIResponse<Transaction[]>> => {
   try {
+    let url = `/txn/by_did?did=${did}&role=${role}`;
+    if (startDate) url += `&StartDate=${startDate}`;
+    if (endDate) url += `&EndDate=${endDate}`;
+    
     const response = await api.get<APIResponse<Transaction[]>>(
-      `/txn/by_did?did=${did}&role=${role}&StartDate=${startDate}&EndDate=${endDate}`,
+      url,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;

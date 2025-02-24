@@ -18,6 +18,7 @@ export interface SignupRequest {
   password: string;
   name: string;
   secret_key?: string;
+  wallet_type?: string; // Add wallet_type as optional
 }
 
 // Auth Types

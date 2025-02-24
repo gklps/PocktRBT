@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getTransactionHistory } from '../api';
 import { Transaction } from '../types';
@@ -19,12 +19,9 @@ const History = () => {
 
       try {
         setLoading(true);
-        const startDate = '2020-01-01';
-        const endDate = new Date().toISOString().split('T')[0];
-
         const [sentTxns, receivedTxns] = await Promise.all([
-          getTransactionHistory(user.did, 'Sender', startDate, endDate, token),
-          getTransactionHistory(user.did, 'Receiver', startDate, endDate, token),
+          getTransactionHistory(user.did, 'Sender', token),
+          getTransactionHistory(user.did, 'Receiver', token),
         ]);
 
         const allTransactions = [
@@ -96,6 +93,12 @@ const History = () => {
                       <p className="text-sm text-gray-500">
                         {new Date(tx.DateTime).toLocaleString()}
                       </p>
+                      {tx.Comment && (
+                        <div className="flex items-center mt-1 text-sm text-gray-600">
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          {tx.Comment}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
