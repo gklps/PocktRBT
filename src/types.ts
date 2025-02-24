@@ -13,6 +13,13 @@ export interface APIErrorResponse {
 
 export type APIResponse<T = any> = APISuccessResponse<T> | APIErrorResponse;
 
+export interface SignupRequest {
+  email: string;
+  password: string;
+  name: string;
+  secret_key?: string;
+}
+
 // Auth Types
 export interface SignupResponse {
   did: string;

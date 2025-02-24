@@ -3,7 +3,7 @@ import type {
   APIResponse,
   SignupResponse,
   LoginResponse,
-  CreateUserRequest,
+  SignupRequest,
   LoginRequest,
   AccountInfo,
   Transaction,
@@ -36,18 +36,23 @@ const handleError = (error: any): never => {
 export const signup = async (
   email: string,
   password: string,
-  name: string,
-  secretKey?: string
-): Promise<APIResponse<SignupResponse>> => {
+  name: string
+): Promise<SignupResponse> => {
   try {
-    const data: CreateUserRequest = { email, password, name };
-    if (secretKey) {
-      data.secret_key = secretKey;
-    }
-    const response = await api.post<APIResponse<SignupResponse>>('/create', data);
+    const data: SignupRequest = {
+      email,
+      password,
+      name,
+      secret_key: password // Using password as secret key
+    };
+    
+    const response = await api.post<SignupResponse>('/create', data);
     return response.data;
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to create account');
   }
 };
 
@@ -56,8 +61,11 @@ export const login = async (email: string, password: string): Promise<LoginRespo
     const data: LoginRequest = { email, password };
     const response = await api.post<LoginResponse>('/login', data);
     return response.data;
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Invalid credentials');
   }
 };
 
@@ -67,8 +75,11 @@ export const getProfile = async (token: string): Promise<User> => {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error('Failed to fetch profile');
   }
 };
 

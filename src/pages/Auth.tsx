@@ -86,14 +86,12 @@ const Auth = () => {
 
       try {
         const response = await signup(email, password, name);
-        if ('error' in response) {
-          toast.error(response.error);
-        } else if (response.status && response.result) {
+        if (response.did && response.email) {
           toast.success('Account created successfully! Please login.');
           setIsLogin(true);
           setPassword('');
         } else {
-          toast.error(response.message || 'Failed to create account');
+          toast.error('Failed to create account');
         }
       } catch (error: any) {
         toast.error(error.message || 'Failed to create account');
